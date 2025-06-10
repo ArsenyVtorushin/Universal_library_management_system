@@ -9,7 +9,7 @@ namespace Universal_library_management_system
     public interface IMediaManager<T>
     {
         void Add(T item);
-        bool Remove(string title);
+        void Remove(string title);
         T FindByTitle(string title);
         IEnumerable<T> FilterByYear(int year);
         IEnumerable<T> GetAllAvailable();

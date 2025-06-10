@@ -41,8 +41,7 @@
             };
 
             var library = new Library<Book>(books);
-            library.Show();
-            
+            //library.PrintAll();            
 
             library.Add(new Book
             {
@@ -54,15 +53,42 @@
                 Genre = "Научная фантастика"
             });
 
-            foreach (var item in library.FilterByYear(1953))
-                Console.WriteLine(item.Title);
+            Console.WriteLine("\n\n");
 
-            library.Remove("451 градус по Фаренгейту");
+            library.PrintAll();
+
+            /*foreach (var item in library.FilterByYear(1953))
+                Console.WriteLine(item.Title);*/
+
+            library.Add(new Book 
+            {
+                Title = "451 градус по Фаренгейту",// !Exception
+                Author = "Рэй Брэдбери",
+                YearPublished = 1953,
+                IsAvailable = true,
+                PagesCount = 240,
+                Genre = "Научная фантастика"
+            });
+
+            library.Remove("Князь Серебряный"); // !Exception
 
 
 
+            library.Add(new Book 
+            {
+                Title = "Белый Клык",
+                Author = "Джек 1 Lондон",// !Exception
+                YearPublished = 1953,
+                IsAvailable = true,
+                PagesCount = 240,
+                Genre = "Научная фантастика"
+            });
 
+            Console.WriteLine("\n\n\n");
+            library.PrintAll();
 
+            library.ExportToJSON("libary1.json");
+            library.ExportToCSV("libCSV.csv");
         }
     }
 }

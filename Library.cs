@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
+
+using Newtonsoft.Json;
 
 namespace Universal_library_management_system
 {
@@ -10,6 +13,9 @@ namespace Universal_library_management_system
     {
         private List<T> _media;
         private Dictionary<string, T> _dictionary;
+
+
+
 
         public Library(List<T> media)
         {
@@ -21,7 +27,7 @@ namespace Universal_library_management_system
         }
 
 
-        public void Show()
+        public void PrintAll()
         {
             foreach (var item in _media)
                 Console.WriteLine($"Название: {item.Title}\nАвтор: {item.Author}\n" +
@@ -34,17 +40,67 @@ namespace Universal_library_management_system
             get { return _media[index]; }
             set { _media[index] = value; }
         }
+        
+
+
+
+
+        public IEnumerable<Book> FindBooksAfterYear(int year)
+        {
+            return (IEnumerable<Book>)_media.Where(el => el.YearPublished > year);
+        }
+
+
+        public IEnumerable<Movie> GetSortedMovies()
+        {
+            return (_media as List<Movie>).OrderByDescending(el => el.Duration);
+        }
+
+
+        public IEnumerable<T> FindUnavailable()
+        {
+            return _media.Where(el => el.IsAvailable == false);
+        }
+
+
 
 
         public void Add(T item)
         {
-            _media.Add(item);
+            try
+            {
+                if (_dictionary.ContainsKey(item.Title))
+                    throw new Exception("Попытка добавить элемент с уже существующим названием");
+                else
+                {
+                    _media.Add(item);
+                    _dictionary.Add(item.Title, item);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
 
-        public IEnumerable<T> FilterByYear(int year)
+        public void Remove(string title)
         {
-            return _media.Where(e => e.YearPublished == year);
+            try
+            {                
+                if (!_dictionary.ContainsKey(title))
+                    throw new Exception("Попытка удалить или найти элемент, которого нет в коллекции");
+                else
+                {
+                    _media.Remove(_dictionary[title]);
+                    _dictionary.Remove(title);
+                }
+                    
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
 
@@ -54,21 +110,37 @@ namespace Universal_library_management_system
         }
 
 
-        public IEnumerable<T> GetAllAvailable()
+        public IEnumerable<T> FilterByYear(int year)
         {
-            return _media.Where(e => e.IsAvailable);
+            return _media.Where(el => el.YearPublished == year);
         }
 
 
-        public bool Remove(string title)
+        public IEnumerable<T> GetAllAvailable()
         {
-            if (_dictionary.ContainsKey(title))
+            return _media.Where(el => el.IsAvailable);
+        }
+
+
+
+
+        public void ExportToJSON(string filePath)
+        {
+            string json = JsonConvert.SerializeObject(_media, Formatting.Indented);
+            File.WriteAllText(filePath, json);
+        }
+
+
+        public void ExportToCSV(string filePath)
+        {
+            using (StreamWriter sw = new StreamWriter(filePath, true))
             {
-                _media.Remove(_dictionary[title]);
-                _dictionary.Remove(title);
-                return true;
+                sw.WriteLine("Title,Author,YearPublished,IsAvailable");
+                foreach (var item in _media)
+                {
+                    sw.WriteLine(item.Title + ',' + item.Author + ',' + item.YearPublished + ',' + item.IsAvailable);
+                }
             }
-            return false;
         }
     }
 
